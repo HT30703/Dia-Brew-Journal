@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="512" height="512" rx="112" fill="#3a2417"/>
+  <rect width="512" height="512" rx="112" fill="url(#g)"/>
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#5a3822"/>
+      <stop offset="1" stop-color="#3a2417"/>
+    </linearGradient>
+  </defs>
+  <!-- steam -->
+  <g stroke="#c98a3c" stroke-width="12" stroke-linecap="round" fill="none" opacity="0.9">
+    <path d="M212 96 q-22 26 0 52 q22 26 0 52"/>
+    <path d="M300 96 q-22 26 0 52 q22 26 0 52"/>
+  </g>
+  <!-- cup -->
+  <path d="M120 250 h236 v40 a118 118 0 0 1 -118 118 h0 a118 118 0 0 1 -118 -118 z" fill="#f6efe3"/>
+  <path d="M356 268 h26 a44 44 0 0 1 0 88 h-30" fill="none" stroke="#f6efe3" stroke-width="26" stroke-linecap="round"/>
+  <!-- coffee surface -->
+  <ellipse cx="238" cy="250" rx="118" ry="26" fill="#b06a2c"/>
+  <!-- saucer -->
+  <rect x="96" y="424" width="284" height="26" rx="13" fill="#c98a3c"/>
+</svg>

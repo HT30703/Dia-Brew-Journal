@@ -1,0 +1,14 @@
+{
+  "name": "Brew Journal",
+  "short_name": "Brew",
+  "description": "Log every coffee brew and dial in consistency.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f6efe3",
+  "theme_color": "#3a2417",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
