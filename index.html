@@ -496,7 +496,7 @@ function applyScan(text){
   const noteLine=text.split(/\n/).map(s=>s.trim()).find(s=>/[,·•]/.test(s)&&/[a-z]{3,}/i.test(s)&&s.length<90&&!/\d{4}/.test(s));
   if(noteLine&&setIf("beanNotes",noteLine.replace(/\s{2,}/g," ")))found.push("flavour notes");
   openDetails();
-  toast(found.length?("Scanned ✓ filled "+found.join(", ")+" — add roaster/name & check":"Scanned — couldn't read much; type the details in"));
+  toast(found.length?"Scanned ✓ filled "+found.join(", ")+" — add roaster/name & check":"Scanned — couldn't read much; type the details in");
 }
 $("scanBtn").addEventListener("click",()=>$("scanInput").click());
 $("scanInput").addEventListener("change",async e=>{const file=e.target.files&&e.target.files[0];e.target.value="";if(!file)return;
