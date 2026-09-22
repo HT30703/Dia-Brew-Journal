@@ -198,9 +198,6 @@
   .bean-picker{margin-bottom:16px;}
   .prefill-note{font-size:12.5px;color:var(--muted);background:var(--surface-2);border-left:3px solid var(--accent-2);
     border-radius:0 12px 12px 0;padding:9px 13px;margin-bottom:16px;}
-  .scan-btn{width:100%;background:var(--surface-2);border:1px dashed var(--accent);color:var(--espresso);border-radius:var(--r-sm);
-    padding:13px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;margin-bottom:18px;transition:transform .1s,background .15s;}
-  .scan-btn:hover{background:var(--sand);} .scan-btn:active{transform:scale(.99);} .scan-btn.busy{opacity:.6;pointer-events:none;}
   .timer{background:var(--surface-2);border:1px solid var(--line);border-radius:16px;padding:15px;margin-bottom:16px;text-align:center;}
   .timer-display{font-family:var(--serif);font-size:36px;color:var(--espresso);font-variant-numeric:tabular-nums;letter-spacing:1px;line-height:1;}
   .timer-btns{display:flex;gap:8px;justify-content:center;margin-top:12px;}
@@ -247,9 +244,6 @@
           <select id="beanPicker"><option value="">— New bean / type below —</option></select>
         </div>
         <div class="prefill-note hidden" id="prefillNote">☕ Kit pre-filled from your last brew — tweak anything that changed.</div>
-
-        <button type="button" class="scan-btn" id="scanBtn">📷 Scan bag with camera</button>
-        <input type="file" id="scanInput" accept="image/*" capture="environment" hidden>
 
         <div class="grid">
           <div class="field"><label>Roaster <span class="req">*</span></label><input id="roaster" list="roaster-list" placeholder="e.g. Onyx"></div>
@@ -468,43 +462,6 @@ function updateDaysOff(){const rd=$("roastDate").value,el=$("daysOff");
 function updateRegulatorVis(){const b=($("brewer").value||"").toLowerCase();const show=b.includes("orea o1");
   $("regulatorField").style.display=show?"":"none";if(!show)$("regulator").value="";}
 $("brewer").addEventListener("input",updateRegulatorVis);
-
-/* camera scan → OCR (Tesseract, loaded on demand) */
-function loadTesseract(){return new Promise((res,rej)=>{if(window.Tesseract)return res();
-  const s=document.createElement("script");s.src="https://unpkg.com/tesseract.js@5/dist/tesseract.min.js";
-  s.onload=()=>res();s.onerror=()=>rej(new Error("load"));document.head.appendChild(s);});}
-function isoDate(y,m,d){return y+"-"+String(m).padStart(2,"0")+"-"+String(d).padStart(2,"0");}
-function parseRoastDate(t){const M={jan:1,feb:2,mar:3,apr:4,may:5,jun:6,jul:7,aug:8,sep:9,oct:10,nov:11,dec:12};
-  let m=t.match(/(\d{1,2})\s*[\/.\-]\s*(\d{1,2})\s*[\/.\-]\s*(\d{2,4})/);
-  if(m){let d=+m[1],mo=+m[2],y=+m[3];if(y<100)y+=2000;if(mo>12&&d<=12){const x=d;d=mo;mo=x;}if(d>=1&&d<=31&&mo>=1&&mo<=12)return isoDate(y,mo,d);}
-  m=t.match(/(\d{1,2})\s*(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?\s*,?\s*(\d{2,4})/i);
-  if(m){let y=+m[3];if(y<100)y+=2000;return isoDate(y,M[m[2].toLowerCase()],+m[1]);}
-  m=t.match(/(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?\s+(\d{1,2})\s*,?\s*(\d{2,4})/i);
-  if(m){let y=+m[3];if(y<100)y+=2000;return isoDate(y,M[m[1].toLowerCase()],+m[2]);}
-  return "";}
-function applyScan(text){
-  const low=" "+text.toLowerCase()+" ",found=[];
-  const setIf=(id,val)=>{const el=$(id);if(el&&val&&!el.value){el.value=val;return true;}return false;};
-  const countries=["Ethiopia","Colombia","Kenya","Brazil","Guatemala","Costa Rica","Rwanda","Burundi","Panama","Honduras","El Salvador","Peru","Yemen","Indonesia","Sumatra","Mexico","Tanzania","Bolivia","Ecuador","Uganda","India","China","Nicaragua","Thailand","Vietnam","Zambia","Malawi"];
-  const country=countries.find(c=>low.includes(c.toLowerCase()));
-  if(country&&setIf("origin",country))found.push("origin");
-  const proc=["Carbonic Maceration","Anaerobic","Washed","Natural","Honey"].find(p=>low.includes(p.toLowerCase().split(" ")[0]));
-  if(proc&&setIf("process",proc))found.push("process");
-  const lvl=["Medium-light","Medium-dark","Light","Medium","Dark"].find(l=>low.includes(l.toLowerCase()));
-  if(lvl&&setIf("roastLevel",lvl))found.push("roast level");
-  const rd=parseRoastDate(text);if(rd&&setIf("roastDate",rd)){found.push("roast date");updateDaysOff();}
-  const noteLine=text.split(/\n/).map(s=>s.trim()).find(s=>/[,·•]/.test(s)&&/[a-z]{3,}/i.test(s)&&s.length<90&&!/\d{4}/.test(s));
-  if(noteLine&&setIf("beanNotes",noteLine.replace(/\s{2,}/g," ")))found.push("flavour notes");
-  openDetails();
-  toast(found.length?"Scanned ✓ filled "+found.join(", ")+" — add roaster/name & check":"Scanned — couldn't read much; type the details in");
-}
-$("scanBtn").addEventListener("click",()=>$("scanInput").click());
-$("scanInput").addEventListener("change",async e=>{const file=e.target.files&&e.target.files[0];e.target.value="";if(!file)return;
-  const btn=$("scanBtn"),label=btn.textContent;btn.classList.add("busy");btn.textContent="Scanning…";
-  try{await loadTesseract();}catch(err){btn.classList.remove("busy");btn.textContent=label;toast("Scanner needs the published app + internet");return;}
-  try{const url=URL.createObjectURL(file);const {data}=await Tesseract.recognize(url,"eng");URL.revokeObjectURL(url);applyScan(data&&data.text?data.text:"");}
-  catch(err){toast("Couldn't read that photo — try again in good light");}
-  finally{btn.classList.remove("busy");btn.textContent=label;}});
 
 /* rating */
 (function(){const p=$("pips");for(let i=1;i<=10;i++){const s=document.createElement("span");s.dataset.v=i;p.appendChild(s);}})();
